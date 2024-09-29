@@ -17,6 +17,11 @@ public class ChatRoomI implements ChatRoom{
     }
 
     @Override
+    public String listUsernames(Current current){
+        return userManager.getChattersNames();
+    }
+
+    @Override
     public void sendMessageBC(String message, Current current) {
         userManager.broadcastMessage(message);
     }

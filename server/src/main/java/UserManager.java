@@ -28,6 +28,14 @@ public class UserManager {
         return "Username not found:" + username;
     }
 
+    public String getChattersNames(){
+        String usernames = "";
+        for (String username : chatters.keySet()){
+            usernames = username + "\n";
+        }
+        return usernames;
+    }
+
     public void broadcastMessage(String message){
         Collection<ChatCallbackPrx> callbacks = chatters.values();
         for (ChatCallbackPrx callback : callbacks){

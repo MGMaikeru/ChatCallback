@@ -10,6 +10,7 @@ module Demo
     interface ChatRoom
     {
         string join(string username, ChatCallback* callback);
+        string listUsernames();
         void sendMessageBC(string s);
         void sendMessage(string s, string receptor);
         string leave(string username);

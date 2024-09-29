@@ -32,7 +32,8 @@ public class Client{
                 if (input.equalsIgnoreCase("exit")){
                     service.leave(username);
                     break;
-                } 
+                }
+                if(input.startsWith("list clients")) System.out.println(service.listUsernames());
                 if (input.startsWith("to ")) {
                     String[] splitMessage = input.split(":", 2);
                     String userHost = splitMessage[0];
