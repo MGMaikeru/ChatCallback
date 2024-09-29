@@ -40,12 +40,12 @@ public class Client{
                     String message = splitMessage[1];
                     String[] splitUsername = userHost.split(" ", 2);
                     String receptor = splitUsername[1];
-                    service.sendMessage(message, receptor);
+                    service.sendMessage(username, message, receptor);
                 }
                 if (input.startsWith("BC")) {
                     String[] splitMessage = input.split(":", 2);
                     String message = splitMessage[1];
-                    service.sendMessageBC(message);
+                    service.sendMessageBC(username, message);
                 }
                 
             }

@@ -36,21 +36,21 @@ public class UserManager {
         return usernames;
     }
 
-    public void broadcastMessage(String message){
+    public void broadcastMessage(String sender, String message){
         Collection<ChatCallbackPrx> callbacks = chatters.values();
         for (ChatCallbackPrx callback : callbacks){
             try {
-                callback.receiveMessage(message);
+                callback.receiveMessage(sender + ": " + message);
             } catch (Exception e) {
                 System.err.println("Failed to send message to one of the users" + e.getMessage());
             }
         }
     }
 
-    public void sendMessageToUser(String receptor, String message){
+    public void sendMessageToUser(String sender, String receptor, String message){
         ChatCallbackPrx callback = chatters.get(receptor);
         if (callback != null) {
-            callback.receiveMessage(message);
+            callback.receiveMessage(sender + " [PRIVATE]: " + message);
         } else {
             System.out.println("User " + receptor + " not found!");
         }

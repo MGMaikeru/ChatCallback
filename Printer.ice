@@ -11,8 +11,8 @@ module Demo
     {
         string join(string username, ChatCallback* callback);
         string listUsernames();
-        void sendMessageBC(string s);
-        void sendMessage(string s, string receptor);
+        void sendMessageBC(string sender, string s);
+        void sendMessage(string sender, string s, string receptor);
         string leave(string username);
     }
 }

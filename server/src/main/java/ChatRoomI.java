@@ -22,13 +22,13 @@ public class ChatRoomI implements ChatRoom{
     }
 
     @Override
-    public void sendMessageBC(String message, Current current) {
-        userManager.broadcastMessage(message);
+    public void sendMessageBC(String sender,String message, Current current) {
+        userManager.broadcastMessage(sender, message);
     }
 
     @Override
-    public void sendMessage(String message, String receptor, Current current) {
-        userManager.sendMessageToUser(receptor, message);
+    public void sendMessage(String sender, String message, String receptor, Current current) {
+        userManager.sendMessageToUser(sender, receptor, message);
     }
 
     @Override
