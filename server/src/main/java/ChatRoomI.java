@@ -1,3 +1,7 @@
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.zeroc.Ice.Current;
 
 import Demo.ChatCallbackPrx;
@@ -5,9 +9,11 @@ import Demo.ChatRoom;
 
 public class ChatRoomI implements ChatRoom{
     private final UserManager userManager;
+    private final ExecutorService taskExecutor = Executors.newFixedThreadPool(10);
 
     public ChatRoomI(){
         this.userManager = new UserManager();
+
     }
 
     public String join(String username, ChatCallbackPrx callback, Current current){
@@ -17,18 +23,25 @@ public class ChatRoomI implements ChatRoom{
     }
 
     @Override
-    public String listUsernames(Current current){
-        return userManager.getChattersNames();
+    public void listUsernames(ChatCallbackPrx callback, Current current){
+        CompletableFuture.runAsync(() -> {
+            String response = userManager.getChattersNames();
+            callback.receiveMessage(response);
+        }, taskExecutor);
     }
 
     @Override
     public void sendMessageBC(String sender,String message, Current current) {
-        userManager.broadcastMessage(sender, message);
+        CompletableFuture.runAsync(() -> {
+            userManager.broadcastMessage(sender, message);
+        }, taskExecutor);
     }
 
     @Override
     public void sendMessage(String sender, String message, String receptor, Current current) {
-        userManager.sendMessageToUser(sender, receptor, message);
+        CompletableFuture.runAsync(() -> {
+            userManager.sendMessageToUser(sender, receptor, message);
+        }, taskExecutor);
     }
 
     @Override
@@ -36,5 +49,9 @@ public class ChatRoomI implements ChatRoom{
         String result = userManager.removeChatter(username);
         System.out.println(result);
         return result;
+    }
+
+    public void shutdown(){
+        taskExecutor.shutdown();
     }
 }
