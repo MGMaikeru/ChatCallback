@@ -34,6 +34,8 @@ public class Client{
                 String input = scanner.nextLine();
 
                 if (input.equalsIgnoreCase("exit")) {
+                    Response response = service.executeCommand(username, "generate_report", null);
+                    System.out.println(response.value);
                     service.leave(username);
                     break;
                 }
@@ -83,14 +85,14 @@ public class Client{
     public static String getUsername(ChatCallbackPrx callbackPrx, ChatRoomPrx service){
         Scanner scanner = new Scanner(System.in);
         String input = "";
-        while (true) { 
+        while (true) {
             System.out.println("Type username: ");
             input = scanner.nextLine();
             String result = service.join(input, callbackPrx);
             if(result.startsWith("User added:")){
                 System.out.println(result);
                 break;
-            } 
+            }
             System.out.println(result + ". Try again!");
         }
         return input;

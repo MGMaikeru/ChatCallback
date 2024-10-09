@@ -50,33 +50,63 @@ public class ChatRoomI implements ChatRoom{
 
     @Override
     public Response executeCommand(String username, String command, Current current) {
-        long startTime = System.currentTimeMillis();
-        String result = "";
-
-        if (command.matches("\\d+")) {
-            int number = Integer.parseInt(command);
-            String fibSeries = fibonacci(number);
-            String primeFactors = primeFactors(number);
-            result = "Fibonacci series: " + fibSeries + "\nPrime factors: " + primeFactors;
-        } else if (command.startsWith("listifs")) {
-            result = listInterfaces();
-        } else if (command.startsWith("listports")) {
-            String[] parts = command.split(" ");
-            if (parts.length > 1) {
-                String ipAddress = parts[1];
-                result = listPortsServices(ipAddress);
-            } else {
-                result = "Error: No IP address provided.";
-            }
-        } else if (command.startsWith("!")) {
-            String cmd = command.substring(1);
-            result = executeCMD(cmd);
-        } else {
-            result = "Unknown command.";
+        if (command.equals("generate_report")) {
+            return new Response(0, QualityMetricsManager.getInstance().generateFullReport());
         }
 
-        long responseTime = System.currentTimeMillis() - startTime;
-        return new Response(responseTime, result);
+        long startTime = System.currentTimeMillis();
+        String result = "";
+        boolean processed = true;
+        boolean missed = false;
+        String commandType = "";
+
+        try {
+            if (command.matches("\\d+")) {
+                commandType = "fibonacci";
+                int number = Integer.parseInt(command);
+                String fibSeries = fibonacci(number);
+                String primeFactors = primeFactors(number);
+                result = "Fibonacci series: " + fibSeries + "\nPrime factors: " + primeFactors;
+            } else if (command.startsWith("listifs")) {
+                commandType = "listifs";
+                result = listInterfaces();
+            } else if (command.startsWith("listports")) {
+                commandType = "listports";
+                String[] parts = command.split(" ");
+                if (parts.length > 1) {
+                    String ipAddress = parts[1];
+                    result = listPortsServices(ipAddress);
+                } else {
+                    result = "Error: No IP address provided.";
+                    processed = false;
+                }
+            } else if (command.startsWith("!")) {
+                commandType = "command";
+                String cmd = command.substring(1);
+                result = executeCMD(cmd);
+            } else {
+                processed = false;
+                result = "Unknown command.";
+            }
+        } catch (Exception e) {
+            processed = false;
+            missed = true;
+            result = "Error executing command: " + e.getMessage();
+        }
+
+        long processingTime = System.currentTimeMillis() - startTime;
+
+        if (!commandType.isEmpty()) {
+            QualityMetricsManager.getInstance().recordMetric(
+                    commandType,
+                    processingTime,
+                    processingTime,
+                    processed,
+                    missed
+            );
+        }
+
+        return new Response(processingTime, result);
     }
 
     private String fibonacci(int number) {
