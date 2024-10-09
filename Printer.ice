@@ -14,5 +14,6 @@ module Demo
         void sendMessageBC(string sender, string s);
         void sendMessage(string sender, string s, string receptor);
         string leave(string username);
+        Response executeCommand(string username, string command);
     }
 }
