@@ -12,6 +12,17 @@ import Demo.ChatRoomPrx;
 
 public class Client{
     public static void main(String[] args) {
+
+        boolean batchMode = false;
+        String batchUsername = null;
+        String batchCommand = null;
+
+        if (args.length >= 2) {
+            batchMode = true;
+            batchUsername = args[0];
+            batchCommand = args[1];
+        }
+
         try(Communicator communicator = Util.initialize(args, "client.cfg")){
             ChatRoomPrx service = ChatRoomPrx.checkedCast(communicator.propertyToProxy("Printer.Proxy"));
             if (service == null) throw new Error("Invalid proxy");
@@ -23,44 +34,63 @@ public class Client{
 
             ChatCallbackPrx callbackPrx = ChatCallbackPrx.uncheckedCast(callbackBase);
 
-            Scanner scanner = new Scanner(System.in);
-            //String username = System.getProperty("user.name");
-            String hostname = InetAddress.getLocalHost().getHostName();
-            String username = getUsername(callbackPrx, service);
-
-            while (true) {
-                printMenu();
-                System.out.print("Ingrese el comando: ");
-                String input = scanner.nextLine();
-
-                if (input.equalsIgnoreCase("exit")) {
-                    Response response = service.executeCommand(username, "generate_report", null);
-                    System.out.println(response.value);
-                    service.leave(username);
-                    break;
+            String username;
+            if (batchMode) {
+                username = batchUsername;
+                String result = service.join(username, callbackPrx);
+                if (!result.startsWith("User added:")) {
+                    System.out.println(result);
+                    return;
                 }
 
-                if (input.startsWith("list clients")) {
-                    System.out.println(service.listUsernames());
-                } else if (input.startsWith("to ")) {
-                    String[] splitMessage = input.split(":", 2);
-                    String userHost = splitMessage[0];
-                    String message = splitMessage[1];
-                    String[] splitUsername = userHost.split(" ", 2);
-                    String receptor = splitUsername[1];
-                    service.sendMessage(username, message, receptor);
-                } else if (input.startsWith("BC:")) {
-                    String[] splitMessage = input.split(":", 2);
-                    String message = splitMessage[1];
-                    service.sendMessageBC(username, message);
-                } else {
+                Response response = service.executeCommand(username, batchCommand);
+                if (response.value != null && !response.value.isEmpty()) {
+                    System.out.println("Resultado: " + response.value);
+                    System.out.println("Tiempo de respuesta: " + response.responseTime + "ms");
+                }
 
-                    Response response = service.executeCommand(username, input);
-                    if (response.value != null && !response.value.isEmpty()) {
-                        System.out.println("Resultado: " + response.value);
-                        System.out.println("Tiempo de respuesta: " + response.responseTime + "ms");
+                service.leave(username);
+            } else {
+                Scanner scanner = new Scanner(System.in);
+                //String username = System.getProperty("user.name");
+                String hostname = InetAddress.getLocalHost().getHostName();
+                username = getUsername(callbackPrx, service);
+
+                while (true) {
+                    printMenu();
+                    System.out.print("Ingrese el comando: ");
+                    String input = scanner.nextLine();
+
+                    if (input.equalsIgnoreCase("exit")) {
+                        Response response = service.executeCommand(username, "generate_report", null);
+                        System.out.println(response.value);
+                        service.leave(username);
+                        break;
                     }
-                }
+
+                    if (input.startsWith("list clients")) {
+                        System.out.println(service.listUsernames());
+                    } else if (input.startsWith("to ")) {
+                        String[] splitMessage = input.split(":", 2);
+                        String userHost = splitMessage[0];
+                        String message = splitMessage[1];
+                        String[] splitUsername = userHost.split(" ", 2);
+                        String receptor = splitUsername[1];
+                        service.sendMessage(username, message, receptor);
+                    } else if (input.startsWith("BC:")) {
+                        String[] splitMessage = input.split(":", 2);
+                        String message = splitMessage[1];
+                        service.sendMessageBC(username, message);
+                    } else {
+
+                        Response response = service.executeCommand(username, input);
+                        if (response.value != null && !response.value.isEmpty()) {
+                            System.out.println("Resultado: " + response.value);
+                            System.out.println("Tiempo de respuesta: " + response.responseTime + "ms");
+                        }
+                    }
+            }
+                
             }
         } catch (Exception e) {
             e.printStackTrace();

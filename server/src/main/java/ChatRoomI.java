@@ -1,3 +1,7 @@
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import Demo.Response;
 import com.zeroc.Ice.Current;
 
@@ -15,6 +19,7 @@ import java.util.List;
 
 public class ChatRoomI implements ChatRoom{
     private final UserManager userManager;
+    private final ExecutorService taskExecutor = Executors.newFixedThreadPool(10);
 
     public ChatRoomI(){
         this.userManager = new UserManager();
@@ -46,6 +51,10 @@ public class ChatRoomI implements ChatRoom{
         String result = userManager.removeChatter(username);
         System.out.println(result);
         return result;
+    }
+
+    public void shutdown(){
+        taskExecutor.shutdown();
     }
 
     @Override
